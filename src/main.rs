@@ -32,7 +32,7 @@ struct TrnCodeTagAddArgs {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), anyhow::Error> {
+async fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
     match &args.command {
         Commands::TrnCodeTagAdd(trn_code_tag_add_args) => {

@@ -26,7 +26,7 @@ pub(crate) async fn trn_code_tag_add(host: &String, tag_type: &String, db_env: &
         FROM trn_code_group a \
         JOIN trn_code_subgroup b ON a.trn_code_group_uuid = b.trn_code_group_uuid \
         JOIN trn_code c ON b.trn_code_subgroup_uuid = c.trn_code_subgroup_uuid \
-        WHERE a.code IN ('ROOMS_LS', 'ROOMS_HOTEL', 'ROOMS_TENANT') \
+        WHERE a.code NOT IN ('ROOMS_LS', 'ROOMS', 'ROOMS_TENANT') \
         ORDER BY c.project_uuid"
     )
         .map(|row: MySqlRow| TrnCode { code_id: Uuid::from_slice(row.get("trn_code_uuid")).unwrap(), project_id: Uuid::from_slice(row.get("project_uuid")).unwrap() }).fetch_all(&pool).await?;
@@ -48,4 +48,33 @@ pub(crate) async fn trn_code_tag_add(host: &String, tag_type: &String, db_env: &
     });
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use sqlx::mysql::{MySqlPoolOptions, MySqlRow};
+    use sqlx::Row;
+    use sqlx::types::Uuid;
+
+    use crate::task::tag_add::TrnCode;
+
+    #[tokio::test]
+    async fn it_works() {
+        let pool = MySqlPoolOptions::new()
+            .max_connections(3)
+            .connect("mysql://secadmin:dT7dfitUhqd0g4FsKueW@dev-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_finance?useSSL=true")
+            .await.expect("Failed to connect to MySQL");
+
+        let trn_codes = sqlx::query(
+            "SELECT c.trn_code_uuid, c.project_uuid \
+        FROM trn_code_group a \
+        JOIN trn_code_subgroup b ON a.trn_code_group_uuid = b.trn_code_group_uuid \
+        JOIN trn_code c ON b.trn_code_subgroup_uuid = c.trn_code_subgroup_uuid \
+        WHERE a.code IN ('ROOMS_LS', 'ROOMS_HOTEL', 'ROOMS_TENANT') \
+        ORDER BY c.project_uuid"
+        ).map(|row: MySqlRow| TrnCode { code_id: Uuid::from_slice(row.get("trn_code_uuid")).unwrap(), project_id: Uuid::from_slice(row.get("project_uuid")).unwrap() })
+            .fetch_all(&pool).await.expect("Failed to fetch trn_codes");
+
+        assert_eq!(trn_codes.len(), 41);
+    }
 }

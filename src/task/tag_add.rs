@@ -3,11 +3,7 @@ use sqlx::Row;
 use sqlx::types::Uuid;
 
 use crate::types::env::Env;
-
-struct TrnCode {
-    code_id: Uuid,
-    project_id: Uuid,
-}
+use crate::types::trn_code::TrnCode;
 
 pub(crate) async fn trn_code_tag_add(host: &String, tag_type: &String, db_env: &Env) -> Result<(), sqlx::Error> {
     let env_db_url = match db_env {
@@ -26,8 +22,7 @@ pub(crate) async fn trn_code_tag_add(host: &String, tag_type: &String, db_env: &
         FROM trn_code_group a \
         JOIN trn_code_subgroup b ON a.trn_code_group_uuid = b.trn_code_group_uuid \
         JOIN trn_code c ON b.trn_code_subgroup_uuid = c.trn_code_subgroup_uuid \
-        WHERE a.code NOT IN ('ROOMS_LS', 'ROOMS', 'ROOMS_TENANT') \
-        ORDER BY c.project_uuid"
+        WHERE a.code NOT IN ('ROOMS_LS', 'ROOMS', 'ROOMS_TENANT')"
     )
         .map(|row: MySqlRow| TrnCode { code_id: Uuid::from_slice(row.get("trn_code_uuid")).unwrap(), project_id: Uuid::from_slice(row.get("project_uuid")).unwrap() }).fetch_all(&pool).await?;
 
@@ -40,10 +35,9 @@ pub(crate) async fn trn_code_tag_add(host: &String, tag_type: &String, db_env: &
     )).collect::<Vec<String>>();
 
     commands.iter().for_each(|s| {
-        let (code, output, error) = run_script::run_script!(s).unwrap();
+        let (code, _output, error) = run_script::run_script!(s).unwrap();
 
         println!("Exit Code: {}", code);
-        println!("Output: {}", output);
         println!("Error: {}", error);
     });
 

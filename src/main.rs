@@ -15,12 +15,13 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    TrnCodeTagAdd(TrnCodeTagAddArgs),
+    TrnCodeTagAdd(TrnCodeTagArgs),
+    TrnCodeTagRemove(TrnCodeTagArgs),
 }
 
 #[derive(Parser, Debug)]
 #[command(author = "xieyu", version = "1.0", about = "help to set trn code tag", long_about = None)]
-struct TrnCodeTagAddArgs {
+struct TrnCodeTagArgs {
     #[arg(long)]
     host: String,
 
@@ -37,6 +38,9 @@ async fn main() -> anyhow::Result<()> {
     match &args.command {
         Commands::TrnCodeTagAdd(trn_code_tag_add_args) => {
             task::tag_add::trn_code_tag_add(&trn_code_tag_add_args.host, &trn_code_tag_add_args.tag_type, &trn_code_tag_add_args.db_env).await?;
+        }
+        Commands::TrnCodeTagRemove(trn_code_tag_remove_args) => {
+            task::tag_remove::trn_code_tag_remove(&trn_code_tag_remove_args.host, &trn_code_tag_remove_args.tag_type, &trn_code_tag_remove_args.db_env).await?;
         }
     }
 

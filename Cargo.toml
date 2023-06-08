@@ -7,11 +7,12 @@ edition = "2021"
 
 [dependencies]
 run_script = "0.10"
-sqlx = { version = "0.6", features = ["runtime-tokio-native-tls", "mysql", "uuid"] }
+sqlx = { version = "0.6", features = ["runtime-tokio-native-tls", "mysql", "uuid", "macros"] }
 clap = { version = "4.3", features = ["derive"] }
 tokio = { version = "1", features = ["rt", "macros"] }
 anyhow = { version = "1" }
-thiserror = { version = "1" }
+thiserror = "1"
+once_cell = "1.18.0"
 
 [profile.release]
 opt-level = "z"

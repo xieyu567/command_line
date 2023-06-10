@@ -1,9 +1,13 @@
 use clap::{Parser, Subcommand};
 
+use crate::error::Error;
 use crate::types::env::Env;
 
 mod task;
 mod types;
+mod error;
+
+type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(Parser)]
 #[command(author = "xieyu", version = "1.0", about = "some task scripts", long_about = None)]
@@ -33,7 +37,7 @@ struct TrnCodeTagArgs {
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> Result<()> {
     let args = Cli::parse();
     match &args.command {
         Commands::TrnCodeTagAdd(trn_code_tag_add_args) => {

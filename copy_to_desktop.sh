@@ -1,1 +1,0 @@
-cp ./target/release/command_line ~/Desktop/scripts

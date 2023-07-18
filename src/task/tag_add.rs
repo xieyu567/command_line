@@ -22,7 +22,7 @@ pub(crate) async fn trn_code_tag_add(host: &String, tag_type: &String, db_env: &
         FROM trn_code_group a \
         JOIN trn_code_subgroup b ON a.trn_code_group_uuid = b.trn_code_group_uuid \
         JOIN trn_code c ON b.trn_code_subgroup_uuid = c.trn_code_subgroup_uuid \
-        WHERE a.code NOT IN ('ROOMS_LS', 'ROOMS', 'ROOMS_TENANT')"
+        WHERE a.code NOT IN ('ROOMS_LS', 'ROOMS', 'ROOMS_TENANT', 'ROOMS_HOTEL')"
     )
         .map(|row: MySqlRow| TrnCode { code_id: Uuid::from_slice(row.get("trn_code_uuid")).unwrap(), project_id: Uuid::from_slice(row.get("project_uuid")).unwrap() }).fetch_all(&pool).await?;
 

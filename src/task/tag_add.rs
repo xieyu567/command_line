@@ -1,11 +1,15 @@
 use sqlx::mysql::{MySqlPoolOptions, MySqlRow};
-use sqlx::Row;
 use sqlx::types::Uuid;
+use sqlx::Row;
 
 use crate::types::env::Env;
 use crate::types::trn_code::TrnCode;
 
-pub(crate) async fn trn_code_tag_add(host: &String, tag_type: &String, db_env: &Env) -> Result<(), sqlx::Error> {
+pub(crate) async fn trn_code_tag_add(
+    host: &String,
+    tag_type: &String,
+    db_env: &Env,
+) -> Result<(), sqlx::Error> {
     let env_db_url = match db_env {
         Env::Dev => "mysql://secadmin:dT7dfitUhqd0g4FsKueW@dev-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_finance?useSSL=true",
         Env::Uat => "mysql://secadmin:PAa7PKwNUe505Dop200S@uat-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_finance?useSSL=true",
@@ -47,8 +51,8 @@ pub(crate) async fn trn_code_tag_add(host: &String, tag_type: &String, db_env: &
 #[cfg(test)]
 mod tests {
     use sqlx::mysql::{MySqlPoolOptions, MySqlRow};
-    use sqlx::Row;
     use sqlx::types::Uuid;
+    use sqlx::Row;
 
     use crate::task::tag_add::TrnCode;
 

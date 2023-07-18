@@ -3,9 +3,9 @@ use clap::{Parser, Subcommand};
 use crate::error::Error;
 use crate::types::env::Env;
 
+mod error;
 mod task;
 mod types;
-mod error;
 
 type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -21,17 +21,39 @@ struct Cli {
 enum Commands {
     TrnCodeTagAdd(TrnCodeTagArgs),
     TrnCodeTagRemove(TrnCodeTagArgs),
+    RoomAttributeAdd(RoomAttributeAddArgs),
 }
 
+/// Stey Inc. finance service trn code tag set and unset task
 #[derive(Parser, Debug)]
 #[command(author = "xieyu", version = "1.0", about = "help to set trn code tag", long_about = None)]
 struct TrnCodeTagArgs {
+    /// host of grpc server
     #[arg(long)]
     host: String,
 
+    /// tag type
     #[arg(short, long)]
     tag_type: String,
 
+    /// db env
+    #[arg(short, long, value_enum, default_value_t = Env::Dev)]
+    db_env: Env,
+}
+
+/// Stey Inc. crs service room attribute set task
+#[derive(Parser, Debug)]
+#[command(author = "xieyu", version = "1.0", about = "common args which supply host and env", long_about = None)]
+struct RoomAttributeAddArgs {
+    /// host of grpc server
+    #[arg(long)]
+    host: String,
+
+    /// init data file path
+    #[arg(long, short, default_value = "./init_data.csv")]
+    csv_path: String,
+
+    /// db env
     #[arg(short, long, value_enum, default_value_t = Env::Dev)]
     db_env: Env,
 }
@@ -41,10 +63,28 @@ async fn main() -> Result<()> {
     let args = Cli::parse();
     match &args.command {
         Commands::TrnCodeTagAdd(trn_code_tag_add_args) => {
-            task::tag_add::trn_code_tag_add(&trn_code_tag_add_args.host, &trn_code_tag_add_args.tag_type, &trn_code_tag_add_args.db_env).await?;
+            task::tag_add::trn_code_tag_add(
+                &trn_code_tag_add_args.host,
+                &trn_code_tag_add_args.tag_type,
+                &trn_code_tag_add_args.db_env,
+            )
+            .await?;
         }
         Commands::TrnCodeTagRemove(trn_code_tag_remove_args) => {
-            task::tag_remove::trn_code_tag_remove(&trn_code_tag_remove_args.host, &trn_code_tag_remove_args.tag_type, &trn_code_tag_remove_args.db_env).await?;
+            task::tag_remove::trn_code_tag_remove(
+                &trn_code_tag_remove_args.host,
+                &trn_code_tag_remove_args.tag_type,
+                &trn_code_tag_remove_args.db_env,
+            )
+            .await?;
+        }
+        Commands::RoomAttributeAdd(room_attribute_add_args) => {
+            task::room_attribute_add::room_attribute_add(
+                &room_attribute_add_args.host,
+                &room_attribute_add_args.csv_path,
+                &room_attribute_add_args.db_env,
+            )
+            .await?;
         }
     }
 

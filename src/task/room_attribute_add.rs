@@ -58,7 +58,7 @@ pub(crate) async fn room_attribute_add(
     host: &String,
     csv_path: &String,
     db_env: &Env,
-) -> Result<(), sqlx::Error> {
+) -> Result<(), anyhow::Error> {
     let env_db_url = match db_env {
         Env::Dev => "mysql://secadmin:dT7dfitUhqd0g4FsKueW@dev-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_crs?useSSL=true",
         Env::Uat => "mysql://secadmin:PAa7PKwNUe505Dop200S@uat-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_crs?useSSL=true",
@@ -107,22 +107,21 @@ pub(crate) async fn room_attribute_add(
     let mut reader = csv::Reader::from_reader(contents.as_bytes());
     let mut records = Vec::new();
     for result in reader.records() {
-        let record = result.expect("a CSV record");
+        let record = result?;
         let project_code = record.get(0).unwrap().to_string();
         let space_code = record.get(1).unwrap().to_string();
-        // let space_code = record.get(1).unwrap().parse::<u8>()?;
         let room_type_name = record.get(2).unwrap().to_string();
         let room_size = record.get(3).unwrap().to_string();
         let floor = record.get(4).unwrap().to_string();
         let orientation = record.get(5).unwrap().to_string();
         let accessible = match record.get(6) {
-            Some("1") => Some(true),
-            Some("0") => Some(false),
+            Some("TRUE") => Some(true),
+            Some("FALSE") => Some(false),
             _ => None,
         };
         let quiet = match record.get(7) {
-            Some("1") => Some(true),
-            Some("0") => Some(false),
+            Some("TRUE") => Some(true),
+            Some("FALSE") => Some(false),
             _ => None,
         };
         let record = CsvData {
@@ -166,8 +165,8 @@ pub(crate) async fn room_attribute_add(
                 space_uuid: item.space_uuid.to_string(),
                 room_type_uuid: item.room_type_uuid.to_string(),
                 room_size: "0.0".to_string(),
-                floor: "high".to_string(),
-                orientation: "east".to_string(),
+                floor: "ROOM_FLOOR_TYPE_MIDDLE".to_string(),
+                orientation: "ROOM_ORIENTATION_TYPE_EAST".to_string(),
                 is_accessible: None,
                 is_quiet: None,
             }),
@@ -175,28 +174,13 @@ pub(crate) async fn room_attribute_add(
     });
 
     let commands = protobuf_params.into_iter().map(|param| format!(
-        "grpcurl -max-time 600 -d \'{{\"projectId\":\"{}\",\"spaceId\":\"{}\",\"roomTypeId\":\"{}\",\"roomSize\":\"{}\",\"floor\":\"{}\",\"orientation\":\"{}\"{}{}}}\' --plaintext {}:9000 com.stey.crs.api.grpc.config.SteyCrsConfigService/ConfigSpaceRoomAttributeSet",
+        "grpcurl -max-time 600 -d \'{{\"projectId\":\"{}\",\"spaceId\":\"{}\",\"roomTypeId\":\"{}\",\"roomSize\":\"{}\",\"roomFloorType\":\"{}\",\"roomOrientationType\":\"{}\"{}{}}}\' --plaintext {}:9000 com.stey.crs.api.grpc.config.SteyCrsConfigService/ConfigSpaceSet",
         param.project_uuid,
         param.space_uuid,
         param.room_type_uuid,
         param.room_size,
-        match param.floor {
-            value if value == "high" => "ROOM_ATTRIBUTE_FLOOR_TYPE_HIGH",
-            value if value == "middle" => "ROOM_ATTRIBUTE_FLOOR_TYPE_MIDDLE",
-            value if value == "low" => "ROOM_ATTRIBUTE_FLOOR_TYPE_LOW",
-            _ => panic!("floor value is not valid")
-        },
-        match param.orientation {
-            value if value == "east" => "ROOM_ATTRIBUTE_ORIENTATION_TYPE_EAST",
-            value if value == "west" => "ROOM_ATTRIBUTE_ORIENTATION_TYPE_WEST",
-            value if value == "south" => "ROOM_ATTRIBUTE_ORIENTATION_TYPE_SOUTH",
-            value if value == "north" => "ROOM_ATTRIBUTE_ORIENTATION_TYPE_NORTH",
-            value if value == "southWest" => "ROOM_ATTRIBUTE_ORIENTATION_TYPE_SOUTH_WEST",
-            value if value == "southEast" => "ROOM_ATTRIBUTE_ORIENTATION_TYPE_SOUTH_EAST",
-            value if value == "northWest" => "ROOM_ATTRIBUTE_ORIENTATION_TYPE_NORTH_WEST",
-            value if value == "northEast" => "ROOM_ATTRIBUTE_ORIENTATION_TYPE_NORTH_EAST",
-            _ => panic!("orientation value is not valid")
-        },
+        param.floor,
+        param.orientation,
         match param.is_accessible {
             Some(value) => format!(",\"isAccessible\":\"{}\"", value),
             _ => "".to_string()
@@ -216,4 +200,35 @@ pub(crate) async fn room_attribute_add(
     });
 
     Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use polars::prelude::*;
+
+    #[tokio::test]
+    async fn it_works() {
+        let csv_data_schema = Schema::from_iter(vec![
+            Field::new("project_code", DataType::Utf8),
+            Field::new("space_code", DataType::Utf8),
+            Field::new("room_type_name", DataType::Utf8),
+            Field::new("room_size", DataType::Utf8),
+            Field::new("floor", DataType::Utf8),
+            Field::new("orientation", DataType::Utf8),
+            Field::new("accessible", DataType::Boolean),
+            Field::new("quiet", DataType::Boolean),
+        ]);
+        let df = CsvReader::from_path(
+            "/Users/peterxie/Desktop/scripts/init_data.csv",
+        )
+        .expect("read parquet file failed")
+        .has_header(true)
+        .with_delimiter(b',')
+        .with_missing_is_null(true)
+        .with_dtypes(Some(SchemaRef::from(csv_data_schema)))
+        .finish()
+        .expect("read parquet file failed");
+
+        println!("{:?}", df);
+    }
 }

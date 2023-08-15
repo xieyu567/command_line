@@ -1,6 +1,9 @@
 use clap::{Parser, Subcommand};
 
 use crate::error::Error;
+use crate::task::rate_plan_online_payment_channel_unset::{
+    Origin, RatePlanOnlinePaymentChannel,
+};
 use crate::types::env::Env;
 
 mod error;
@@ -22,6 +25,7 @@ enum Commands {
     TrnCodeTagAdd(TrnCodeTagArgs),
     TrnCodeTagRemove(TrnCodeTagArgs),
     RoomAttributeAdd(RoomAttributeAddArgs),
+    RatePlanOnlinePaymentChannelUnset(RatePlanOnlinePaymentChannelUnsetArgs),
 }
 
 /// Stey Inc. finance service trn code tag set and unset task
@@ -58,6 +62,27 @@ struct RoomAttributeAddArgs {
     db_env: Env,
 }
 
+/// Stey Inc. dc rate plan online payment channel unset task
+#[derive(Parser, Debug)]
+#[command(author = "xieyu", version = "1.0", about = "common args which supply host and env", long_about = None)]
+struct RatePlanOnlinePaymentChannelUnsetArgs {
+    /// host of grpc server
+    #[arg(long)]
+    host: String,
+
+    /// origin
+    #[arg(long, short)]
+    origin: Origin,
+
+    /// online payment channel
+    #[arg(long, short)]
+    channel: RatePlanOnlinePaymentChannel,
+
+    /// db env
+    #[arg(short, long, value_enum, default_value_t = Env::Dev)]
+    db_env: Env,
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Cli::parse();
@@ -85,6 +110,17 @@ async fn main() -> Result<()> {
                 &room_attribute_add_args.db_env,
             )
             .await?;
+        }
+        Commands::RatePlanOnlinePaymentChannelUnset(
+            rate_plan_online_payment_channel_unset_args,
+        ) => {
+            task::rate_plan_online_payment_channel_unset::rate_plan_online_payment_channel_unset(
+                &rate_plan_online_payment_channel_unset_args.host,
+                &rate_plan_online_payment_channel_unset_args.origin,
+                &rate_plan_online_payment_channel_unset_args.channel,
+                &rate_plan_online_payment_channel_unset_args.db_env,
+            )
+                .await?;
         }
     }
 

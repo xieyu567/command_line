@@ -6,7 +6,11 @@ use sqlx::types::Uuid;
 use sqlx::Row;
 
 use crate::types::env::Env;
-use crate::types::trn_code::TrnCode;
+
+pub(crate) struct TrnCode {
+    pub(crate) code_id: Uuid,
+    pub(crate) project_id: Uuid,
+}
 
 static TAG_TYPE: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
     let mut trn_code_map = HashMap::new();

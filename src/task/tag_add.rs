@@ -3,7 +3,11 @@ use sqlx::types::Uuid;
 use sqlx::Row;
 
 use crate::types::env::Env;
-use crate::types::trn_code::TrnCode;
+
+pub(crate) struct TrnCode {
+    pub(crate) code_id: Uuid,
+    pub(crate) project_id: Uuid,
+}
 
 pub(crate) async fn trn_code_tag_add(
     host: &String,

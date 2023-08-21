@@ -8,6 +8,7 @@ use sqlx::mysql::MySqlPoolOptions;
 use sqlx::types::Uuid;
 
 use crate::types::env::Env;
+use crate::utils::util::*;
 
 #[derive(Debug, sqlx::FromRow)]
 struct SpaceInfo {
@@ -59,15 +60,9 @@ pub(crate) async fn room_attribute_add(
     csv_path: &String,
     db_env: &Env,
 ) -> Result<(), anyhow::Error> {
-    let env_db_url = match db_env {
-        Env::Dev => "mysql://secadmin:dT7dfitUhqd0g4FsKueW@dev-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_crs?useSSL=true",
-        Env::Uat => "mysql://secadmin:PAa7PKwNUe505Dop200S@uat-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_crs?useSSL=true",
-        Env::Prod => "mysql://secadmin:X9ONgqR4W1rVwMGkQvAr@prod-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_crs?useSSL=true",
-    };
-
     let pool = MySqlPoolOptions::new()
         .max_connections(5)
-        .connect(env_db_url)
+        .connect(get_db_url(db_env).as_str())
         .await?;
 
     let space_info = sqlx::query_as::<_, SpaceInfo>(
@@ -192,12 +187,7 @@ pub(crate) async fn room_attribute_add(
         host
     )).collect::<Vec<String>>();
 
-    commands.iter().for_each(|s| {
-        let (code, _output, error) = run_script::run_script!(s).unwrap();
-        // println!("{}", s);
-        println!("Exit Code: {}", code);
-        println!("Error: {}\n", error);
-    });
+    run_command(commands);
 
     Ok(())
 }

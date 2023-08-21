@@ -1,19 +1,20 @@
 use clap::{Parser, Subcommand};
 
 use crate::error::Error;
-use crate::task::rate_plan_online_payment_channel_unset::{
+use crate::tasks::rate_plan_online_payment_channel_unset::{
     Origin, RatePlanOnlinePaymentChannel,
 };
 use crate::types::env::Env;
 
 mod error;
-mod task;
+mod tasks;
 mod types;
+mod utils;
 
 type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(Parser)]
-#[command(author = "xieyu", version = "1.0", about = "some task scripts", long_about = None)]
+#[command(author = "xieyu", version = "1.0", about = "some tasks scripts", long_about = None)]
 #[command(propagate_version = true)]
 struct Cli {
     #[command(subcommand)]
@@ -39,7 +40,7 @@ struct CommonArgs {
     db_env: Env,
 }
 
-/// Stey Inc. finance service trn code tag set and unset task
+/// Stey Inc. finance service trn code tag set and unset tasks
 #[derive(Parser, Debug)]
 #[command(author = "xieyu", version = "1.0", about = "help to set trn code tag", long_about = None)]
 struct TrnCodeTagArgs {
@@ -56,7 +57,7 @@ struct TrnCodeTagArgs {
     db_env: Env,
 }
 
-/// Stey Inc. crs service room attribute set task
+/// Stey Inc. crs service room attribute set tasks
 #[derive(Parser, Debug)]
 #[command(author = "xieyu", version = "1.0", about = "common args which supply host and env", long_about = None)]
 struct RoomAttributeAddArgs {
@@ -73,7 +74,7 @@ struct RoomAttributeAddArgs {
     db_env: Env,
 }
 
-/// Stey Inc. dc rate plan online payment channel unset task
+/// Stey Inc. dc rate plan online payment channel unset tasks
 #[derive(Parser, Debug)]
 #[command(author = "xieyu", version = "1.0", about = "common args which supply host and env", long_about = None)]
 struct RatePlanOnlinePaymentChannelUnsetArgs {
@@ -99,7 +100,7 @@ async fn main() -> Result<()> {
     let args = Cli::parse();
     match &args.command {
         Commands::TrnCodeTagAdd(trn_code_tag_add_args) => {
-            task::tag_add::trn_code_tag_add(
+            tasks::tag_add::trn_code_tag_add(
                 &trn_code_tag_add_args.host,
                 &trn_code_tag_add_args.tag_type,
                 &trn_code_tag_add_args.db_env,
@@ -107,7 +108,7 @@ async fn main() -> Result<()> {
             .await?;
         }
         Commands::TrnCodeTagRemove(trn_code_tag_remove_args) => {
-            task::tag_remove::trn_code_tag_remove(
+            tasks::tag_remove::trn_code_tag_remove(
                 &trn_code_tag_remove_args.host,
                 &trn_code_tag_remove_args.tag_type,
                 &trn_code_tag_remove_args.db_env,
@@ -115,7 +116,7 @@ async fn main() -> Result<()> {
             .await?;
         }
         Commands::RoomAttributeAdd(room_attribute_add_args) => {
-            task::room_attribute_add::room_attribute_add(
+            tasks::room_attribute_add::room_attribute_add(
                 &room_attribute_add_args.host,
                 &room_attribute_add_args.csv_path,
                 &room_attribute_add_args.db_env,
@@ -125,7 +126,7 @@ async fn main() -> Result<()> {
         Commands::RatePlanOnlinePaymentChannelUnset(
             rate_plan_online_payment_channel_unset_args,
         ) => {
-            task::rate_plan_online_payment_channel_unset::rate_plan_online_payment_channel_unset(
+            tasks::rate_plan_online_payment_channel_unset::rate_plan_online_payment_channel_unset(
                 &rate_plan_online_payment_channel_unset_args.host,
                 &rate_plan_online_payment_channel_unset_args.origin,
                 &rate_plan_online_payment_channel_unset_args.channel,
@@ -134,7 +135,7 @@ async fn main() -> Result<()> {
                 .await?;
         }
         Commands::OperationReasonAdd(common_args) => {
-            task::operation_reason_add::operation_reason_add(
+            tasks::operation_reason_add::operation_reason_add(
                 &common_args.host,
                 &common_args.db_env,
             )

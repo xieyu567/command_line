@@ -4,6 +4,7 @@ use sqlx::types::Uuid;
 use sqlx::Row;
 
 use crate::types::env::Env;
+use crate::utils::util::*;
 
 #[derive(Debug, sqlx::FromRow)]
 struct RatePlanRecord {
@@ -32,15 +33,9 @@ pub(crate) async fn rate_plan_online_payment_channel_unset(
     channel: &RatePlanOnlinePaymentChannel,
     db_env: &Env,
 ) -> Result<(), sqlx::Error> {
-    let env_db_url = match db_env {
-        Env::Dev => "mysql://secadmin:dT7dfitUhqd0g4FsKueW@dev-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_dc?useSSL=true",
-        Env::Uat => "mysql://secadmin:PAa7PKwNUe505Dop200S@uat-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_dc?useSSL=true",
-        Env::Prod => "mysql://secadmin:X9ONgqR4W1rVwMGkQvAr@prod-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_dc?useSSL=true",
-    };
-
     let pool = MySqlPoolOptions::new()
         .max_connections(5)
-        .connect(env_db_url)
+        .connect(get_db_url(db_env).as_str())
         .await?;
 
     let rate_plan_info = sqlx::query(
@@ -84,12 +79,7 @@ pub(crate) async fn rate_plan_online_payment_channel_unset(
         host
     )).collect::<Vec<String>>();
 
-    commands.iter().for_each(|s| {
-        let (code, _output, error) = run_script::run_script!(s).unwrap();
-
-        println!("Exit Code: {}", code);
-        println!("Error: {}", error);
-    });
+    run_command(commands);
 
     Ok(())
 }

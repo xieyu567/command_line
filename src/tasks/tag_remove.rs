@@ -6,6 +6,7 @@ use sqlx::types::Uuid;
 use sqlx::Row;
 
 use crate::types::env::Env;
+use crate::utils::util::*;
 
 pub(crate) struct TrnCode {
     pub(crate) code_id: Uuid,
@@ -23,15 +24,9 @@ pub(crate) async fn trn_code_tag_remove(
     tag_type: &String,
     db_env: &Env,
 ) -> Result<(), sqlx::Error> {
-    let env_db_url = match db_env {
-        Env::Dev => "mysql://secadmin:dT7dfitUhqd0g4FsKueW@dev-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_finance?useSSL=true",
-        Env::Uat => "mysql://secadmin:PAa7PKwNUe505Dop200S@uat-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_finance?useSSL=true",
-        Env::Prod => "mysql://secadmin:X9ONgqR4W1rVwMGkQvAr@prod-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_finance?useSSL=true",
-    };
-
     let pool = MySqlPoolOptions::new()
         .max_connections(5)
-        .connect(env_db_url)
+        .connect(get_db_url(db_env).as_str())
         .await?;
 
     let trn_codes = sqlx::query(
@@ -55,12 +50,7 @@ pub(crate) async fn trn_code_tag_remove(
         host
     )).collect::<Vec<String>>();
 
-    commands.iter().for_each(|s| {
-        let (code, _output, error) = run_script::run_script!(s).unwrap();
-
-        println!("Exit Code: {}", code);
-        println!("Error: {}", error);
-    });
+    run_command(commands);
 
     Ok(())
 }

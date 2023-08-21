@@ -26,6 +26,17 @@ enum Commands {
     TrnCodeTagRemove(TrnCodeTagArgs),
     RoomAttributeAdd(RoomAttributeAddArgs),
     RatePlanOnlinePaymentChannelUnset(RatePlanOnlinePaymentChannelUnsetArgs),
+    OperationReasonAdd(CommonArgs),
+}
+
+#[derive(Parser, Debug)]
+#[command(author = "xieyu", version = "1.0", about = "common args which supply host and env", long_about = None)]
+struct CommonArgs {
+    #[arg(long)]
+    host: String,
+
+    #[arg(short, long, value_enum, default_value_t = Env::Dev)]
+    db_env: Env,
 }
 
 /// Stey Inc. finance service trn code tag set and unset task
@@ -121,6 +132,13 @@ async fn main() -> Result<()> {
                 &rate_plan_online_payment_channel_unset_args.db_env,
             )
                 .await?;
+        }
+        Commands::OperationReasonAdd(common_args) => {
+            task::operation_reason_add::operation_reason_add(
+                &common_args.host,
+                &common_args.db_env,
+            )
+            .await?;
         }
     }
 

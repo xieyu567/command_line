@@ -51,7 +51,7 @@ pub(crate) async fn operation_reason_add(
             reason_type: "OPERATION_REASON_TYPE_RESERVATION_CANCELLATION".to_string(),
             code: "{\"underlying\":\"BPG\"}".to_string(),
             title: "{\"underlying\":[{\"locale\":\"zh\",\"content\":\"发现更低价格\"},{\"locale\":\"en\",\"content\":\"Found cheaper prices elsewhere\"}]}".to_string(),
-            description: Option::from("{\"underlying\":[{\"locale\":\"zh\",\"content\":\"Stey提供最优价保证，如果您在其他地方找到更低价格，我们会将价格调至该低价。请将在其他订房网站找到的更低价格截图并在入住前出示给前台工作人员。\"},{\"locale\":\"en\",\"content\":\"When you book your stay directly on Stey app, you'll be guaranteed the best room rate. If a lower rate is available on another website, we will match the lower rate. Just take a screenshot and show it to our community team before check-in.\"}]}".to_string()),
+            description: Option::from("{\"underlying\":[{\"locale\":\"zh\",\"content\":\"Stey提供最优价保证，如果您在其他地方找到更低价格，我们会将价格调至该低价。请将在其他订房网站找到的更低价格截图并在入住前出示给前台工作人员。\"},{\"locale\":\"en\",\"content\":\"When you book your stay directly on Stey app, you will be guaranteed the best room rate. If a lower rate is available on another website, we will match the lower rate. Just take a screenshot and show it to our community team before check-in.\"}]}".to_string()),
             is_internal: false,
         },
         Reason {

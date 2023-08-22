@@ -29,6 +29,7 @@ enum Commands {
     RatePlanOnlinePaymentChannelUnset(RatePlanOnlinePaymentChannelUnsetArgs),
     OperationReasonAdd(CommonArgs),
     OperationReasonDeleteAll(CommonArgs),
+    RatePlanUpdate(CommonArgs),
 }
 
 #[derive(Parser, Debug)]
@@ -144,6 +145,13 @@ async fn main() -> Result<()> {
         }
         Commands::OperationReasonDeleteAll(common_args) => {
             tasks::operation_reason_delete_all::operation_reason_delete_all(
+                &common_args.host,
+                &common_args.db_env,
+            )
+            .await?;
+        }
+        Commands::RatePlanUpdate(common_args) => {
+            tasks::rate_plan_update::rate_plan_update(
                 &common_args.host,
                 &common_args.db_env,
             )

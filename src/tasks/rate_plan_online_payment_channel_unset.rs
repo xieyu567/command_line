@@ -35,7 +35,7 @@ pub(crate) async fn rate_plan_online_payment_channel_unset(
 ) -> Result<(), sqlx::Error> {
     let pool = MySqlPoolOptions::new()
         .max_connections(5)
-        .connect(get_db_url(db_env).as_str())
+        .connect(get_db_url(db_env, "dc").as_str())
         .await?;
 
     let rate_plan_info = sqlx::query(

@@ -28,6 +28,7 @@ enum Commands {
     RoomAttributeAdd(RoomAttributeAddArgs),
     RatePlanOnlinePaymentChannelUnset(RatePlanOnlinePaymentChannelUnsetArgs),
     OperationReasonAdd(CommonArgs),
+    OperationReasonDeleteAll(CommonArgs),
 }
 
 #[derive(Parser, Debug)]
@@ -136,6 +137,13 @@ async fn main() -> Result<()> {
         }
         Commands::OperationReasonAdd(common_args) => {
             tasks::operation_reason_add::operation_reason_add(
+                &common_args.host,
+                &common_args.db_env,
+            )
+            .await?;
+        }
+        Commands::OperationReasonDeleteAll(common_args) => {
+            tasks::operation_reason_delete_all::operation_reason_delete_all(
                 &common_args.host,
                 &common_args.db_env,
             )

@@ -62,7 +62,7 @@ pub(crate) async fn room_attribute_add(
 ) -> Result<(), anyhow::Error> {
     let pool = MySqlPoolOptions::new()
         .max_connections(5)
-        .connect(get_db_url(db_env).as_str())
+        .connect(get_db_url(db_env, "crs").as_str())
         .await?;
 
     let space_info = sqlx::query_as::<_, SpaceInfo>(
@@ -190,35 +190,4 @@ pub(crate) async fn room_attribute_add(
     run_command(commands);
 
     Ok(())
-}
-
-#[cfg(test)]
-mod test {
-    use polars::prelude::*;
-
-    #[tokio::test]
-    async fn it_works() {
-        let csv_data_schema = Schema::from_iter(vec![
-            Field::new("project_code", DataType::Utf8),
-            Field::new("space_code", DataType::Utf8),
-            Field::new("room_type_name", DataType::Utf8),
-            Field::new("room_size", DataType::Utf8),
-            Field::new("floor", DataType::Utf8),
-            Field::new("orientation", DataType::Utf8),
-            Field::new("accessible", DataType::Boolean),
-            Field::new("quiet", DataType::Boolean),
-        ]);
-        let df = CsvReader::from_path(
-            "/Users/peterxie/Desktop/scripts/init_data.csv",
-        )
-        .expect("read parquet file failed")
-        .has_header(true)
-        .with_delimiter(b',')
-        .with_missing_is_null(true)
-        .with_dtypes(Some(SchemaRef::from(csv_data_schema)))
-        .finish()
-        .expect("read parquet file failed");
-
-        println!("{:?}", df);
-    }
 }

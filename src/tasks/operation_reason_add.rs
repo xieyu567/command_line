@@ -135,16 +135,16 @@ pub(crate) async fn operation_reason_add(
 
     let pool = MySqlPoolOptions::new()
         .max_connections(5)
-        .connect(get_db_url(db_env).as_str())
+        .connect(get_db_url(db_env, "crs").as_str())
         .await?;
 
-    let project_uuid = sqlx::query(
-        "SELECT project_uuid \
-        FROM projection_project_project ",
-    )
-    .map(|row: MySqlRow| Uuid::from_slice(row.get("project_uuid")).unwrap())
-    .fetch_all(&pool)
-    .await?;
+    let project_uuid =
+        sqlx::query("SELECT project_uuid FROM projection_project_project ")
+            .map(|row: MySqlRow| {
+                Uuid::from_slice(row.get("project_uuid")).unwrap()
+            })
+            .fetch_all(&pool)
+            .await?;
 
     let commands: Vec<String> = project_uuid.iter().flat_map(|project_uuid| init_data.iter().map(move |data| format!(
         "grpcurl -max-time 600 -d \'{{\"projectId\":\"{}\",\"operationReasonType\":\"{}\",\"code\":{},\"title\":{},\"isInternal\":{}{}}}\' --plaintext {}:9000 com.stey.crs.api.grpc.config.SteyCrsConfigService.ConfigOperationReasonCreate",

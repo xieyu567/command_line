@@ -26,7 +26,7 @@ pub(crate) async fn trn_code_tag_remove(
 ) -> Result<(), sqlx::Error> {
     let pool = MySqlPoolOptions::new()
         .max_connections(5)
-        .connect(get_db_url(db_env).as_str())
+        .connect(get_db_url(db_env, "finance").as_str())
         .await?;
 
     let trn_codes = sqlx::query(

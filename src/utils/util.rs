@@ -1,10 +1,10 @@
 use crate::types::env::Env;
 
-pub(crate) fn get_db_url(env: &Env) -> String {
+pub(crate) fn get_db_url(env: &Env, module: &str) -> String {
     match env {
-        Env::Dev => "mysql://secadmin:dT7dfitUhqd0g4FsKueW@dev-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_dc?useSSL=true",
-        Env::Uat => "mysql://secadmin:PAa7PKwNUe505Dop200S@uat-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_dc?useSSL=true",
-        Env::Prod => "mysql://secadmin:X9ONgqR4W1rVwMGkQvAr@prod-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_dc?useSSL=true",
+        Env::Dev => format!("mysql://secadmin:dT7dfitUhqd0g4FsKueW@dev-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_{}?useSSL=true", module),
+        Env::Uat => format!("mysql://secadmin:PAa7PKwNUe505Dop200S@uat-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_{}?useSSL=true", module),
+        Env::Prod => format!("mysql://secadmin:X9ONgqR4W1rVwMGkQvAr@prod-mysql-01.mysql.database.chinacloudapi.cn:3306/stey_{}?useSSL=true", module),
     }
         .to_string()
 }

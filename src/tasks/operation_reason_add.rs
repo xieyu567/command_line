@@ -5,7 +5,7 @@ use sqlx::Row;
 use crate::types::env::Env;
 use crate::utils::util::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 struct Reason {
     reason_type: String,
     code: String,
@@ -18,7 +18,7 @@ pub(crate) async fn operation_reason_add(
     host: &String,
     db_env: &Env,
 ) -> Result<(), sqlx::Error> {
-    let init_data: Vec<Reason> = vec![
+    let init_data: [Reason; 17] = [
         Reason {
             reason_type: "OPERATION_REASON_TYPE_RESERVATION_CANCELLATION".to_string(),
             code: "{\"underlying\":\"TravelChange\"}".to_string(),
@@ -130,6 +130,13 @@ pub(crate) async fn operation_reason_add(
             title: "{\"underlying\":[{\"locale\":\"zh\",\"content\":\"其他\"},{\"locale\":\"en\",\"content\":\"Others\"}]}".to_string(),
             description: None,
             is_internal: false,
+        },
+        Reason {
+            reason_type: "OPERATION_REASON_TYPE_RESERVATION_CANCELLATION".to_string(),
+            code: "{\"underlying\":\"OTA\"}".to_string(),
+            title: "{\"underlying\":[{\"locale\":\"zh\",\"content\":\"OTA订单取消\"},{\"locale\":\"en\",\"content\":\"OTA order cancelled\"}]}".to_string(),
+            description: None,
+            is_internal: true,
         },
     ];
 

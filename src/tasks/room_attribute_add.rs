@@ -168,7 +168,7 @@ pub(crate) async fn room_attribute_add(
         }
     });
 
-    let commands = protobuf_params.into_iter().map(|param| format!(
+    let commands: Vec<String> = protobuf_params.into_iter().map(|param| format!(
         "grpcurl -max-time 600 -d \'{{\"projectId\":\"{}\",\"spaceId\":\"{}\",\"roomTypeId\":\"{}\",\"roomSize\":\"{}\",\"roomFloorType\":\"{}\",\"roomOrientationType\":\"{}\"{}{}}}\' --plaintext {}:9000 com.stey.crs.api.grpc.config.SteyCrsConfigService/ConfigSpaceSet",
         param.project_uuid,
         param.space_uuid,
@@ -185,7 +185,7 @@ pub(crate) async fn room_attribute_add(
             _ => "".to_string()
         },
         host
-    )).collect::<Vec<String>>();
+    )).collect();
 
     run_command(commands);
 

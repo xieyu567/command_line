@@ -1,7 +1,6 @@
 use clap::ValueEnum;
-use sqlx::mysql::{MySqlPoolOptions, MySqlRow};
+use sqlx::mysql::MySqlPoolOptions;
 use sqlx::types::Uuid;
-use sqlx::Row;
 
 use crate::types::env::Env;
 use crate::utils::util::*;
@@ -38,7 +37,7 @@ pub(crate) async fn rate_plan_online_payment_channel_unset(
         .connect(get_db_url(db_env, "dc").as_str())
         .await?;
 
-    let rate_plan_info = sqlx::query(
+    let rate_plan_info: Vec<RatePlanRecord> = sqlx::query_as(
         r#"SELECT project_uuid, rate_plan_uuid 
         FROM rate_plan_online_payment_channel 
         WHERE origin=? AND online_payment_channel=? "#,
@@ -54,14 +53,10 @@ pub(crate) async fn rate_plan_online_payment_channel_unset(
         RatePlanOnlinePaymentChannel::Wechat => "wechat",
         RatePlanOnlinePaymentChannel::Wallet => "stey_wallet",
     })
-    .map(|row: MySqlRow| RatePlanRecord {
-        project_uuid: Uuid::from_slice(row.get("project_uuid")).unwrap(),
-        rate_plan_uuid: Uuid::from_slice(row.get("rate_plan_uuid")).unwrap(),
-    })
     .fetch_all(&pool)
     .await?;
 
-    let commands = rate_plan_info.into_iter().map(|rate_plan_info| format!(
+    let commands: Vec<String> = rate_plan_info.into_iter().map(|rate_plan_info| format!(
         "grpcurl -max-time 600 -d \'{{\"projectId\":\"{}\",\"ratePlanId\":\"{}\",\"origin\":\"{}\",\"RatePlanOnlinePaymentChannel\":\"{}\"}}\' --plaintext {}:9000 com.stey.dc.api.grpc.SteyDcService.RatePlanOnlinePaymentChannelUnset",
         rate_plan_info.project_uuid,
         rate_plan_info.rate_plan_uuid,
@@ -77,7 +72,7 @@ pub(crate) async fn rate_plan_online_payment_channel_unset(
             RatePlanOnlinePaymentChannel::Wallet => "ONLINE_PAYMENT_CHANNEL_STEY_WALLET",
         },
         host
-    )).collect::<Vec<String>>();
+    )).collect();
 
     run_command(commands);
 

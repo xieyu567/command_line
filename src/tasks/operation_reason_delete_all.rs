@@ -19,7 +19,7 @@ pub(crate) async fn operation_reason_delete_all(
         .connect(get_db_url(db_env, "crs").as_str())
         .await?;
 
-    let reasons = sqlx::query_as::<_, Reason>(
+    let reasons: Vec<Reason> = sqlx::query_as(
         "SELECT project_uuid, operation_reason_uuid \
         FROM operation_reason ",
     )

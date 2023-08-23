@@ -1,16 +1,16 @@
 use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
-use sqlx::mysql::{MySqlPoolOptions, MySqlRow};
+use sqlx::mysql::MySqlPoolOptions;
 use sqlx::types::Uuid;
-use sqlx::Row;
 
 use crate::types::env::Env;
 use crate::utils::util::*;
 
-pub(crate) struct TrnCode {
-    pub(crate) code_id: Uuid,
-    pub(crate) project_id: Uuid,
+#[derive(Debug, sqlx::FromRow)]
+struct TrnCode {
+    trn_code_uuid: Uuid,
+    project_uuid: Uuid,
 }
 
 static TAG_TYPE: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
@@ -29,26 +29,22 @@ pub(crate) async fn trn_code_tag_remove(
         .connect(get_db_url(db_env, "finance").as_str())
         .await?;
 
-    let trn_codes = sqlx::query(
-        "SELECT trn_code_uuid, project_uuid \
+    let trn_codes: Vec<TrnCode> = sqlx::query_as(
+        r#"SELECT trn_code_uuid, project_uuid \
         FROM trn_code_tag \
-        WHERE trn_code_tag_type = (?)",
+        WHERE trn_code_tag_type = (?)"#,
     )
     .bind(TAG_TYPE.get(&tag_type.as_str()).unwrap())
-    .map(|row: MySqlRow| TrnCode {
-        code_id: Uuid::from_slice(row.get("trn_code_uuid")).unwrap(),
-        project_id: Uuid::from_slice(row.get("project_uuid")).unwrap(),
-    })
     .fetch_all(&pool)
     .await?;
 
-    let commands = trn_codes.into_iter().map(|trn_code| format!(
+    let commands: Vec<String> = trn_codes.into_iter().map(|trn_code| format!(
         "grpcurl -max-time 600 -d \'{{\"projectId\":\"{}\",\"trnCodeId\":\"{}\",\"tagType\":\"{}\"}}\' --plaintext {}:9000 com.stey.finance.api.grpc.config.SteyFinanceConfigService/ConfigTrnCodeTagUnset",
-        trn_code.project_id,
-        trn_code.code_id,
+        trn_code.project_uuid,
+        trn_code.trn_code_uuid,
         tag_type,
         host
-    )).collect::<Vec<String>>();
+    )).collect();
 
     run_command(commands);
 

@@ -116,7 +116,7 @@ pub(crate) async fn rate_plan_update(
         })
         .collect();
 
-    let convert_data = records
+    let convert_data: Vec<RatePlanMarketRecord> = records
         .into_iter()
         .map(|record| {
             let project_uuid = project_map.get(&record.project_code).unwrap();
@@ -131,12 +131,12 @@ pub(crate) async fn rate_plan_update(
                 market_uuid: *market_uuid,
             }
         })
-        .collect::<Vec<RatePlanMarketRecord>>();
+        .collect();
 
-    let rate_plan_ids = convert_data
+    let rate_plan_ids: Vec<Uuid> = convert_data
         .iter()
         .map(|item| item.rate_plan_uuid)
-        .collect::<Vec<Uuid>>();
+        .collect();
 
     let rate_plan_info: Vec<RatePlanRecord> =
         sqlx::query_as(&format!(r#"SELECT project_uuid, rate_plan_uuid, code, name_t, source_uuid, resv_type_uuid, lead_time, min_stay, max_stay, breakfast, is_suppressed FROM rate_plan WHERE rate_plan_uuid IN ({})"#, rate_plan_ids.iter().map(|i| format!("uuid_to_bin('{}')", i.to_string())).collect::<Vec<String>>().join(",")))

@@ -19,5 +19,8 @@ run_rate_plan_online_payment_channel_unset_task ENV:
 run_operation_reason_add_task ENV:
     ~/Desktop/scripts/command_line operation-reason-add --host {{crsPodIp}} -d {{ENV}}
 
+run_operation_reason_remove_task ENV:
+    ~/Desktop/scripts/command_line operation-reason-remove --host {{crsPodIp}} -d {{ENV}}
+
 run_rate_plan_update_task ENV:
     ~/Desktop/scripts/command_line rate-plan-update --host {{crsPodIp}} -d {{ENV}}

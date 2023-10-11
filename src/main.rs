@@ -30,6 +30,7 @@ enum Commands {
     OperationReasonAdd(CommonArgs),
     OperationReasonDeleteAll(CommonArgs),
     RatePlanUpdate(CommonArgs),
+    UserIdentityAdd(CommonArgs),
 }
 
 #[derive(Parser, Debug)]
@@ -156,6 +157,13 @@ async fn main() -> Result<()> {
                 &common_args.db_env,
             )
             .await?;
+        }
+        Commands::UserIdentityAdd(common_args) => {
+            tasks::user_identity_add::user_identity_add(
+                &common_args.host,
+                &common_args.db_env,
+            )
+            .await?
         }
     }
 

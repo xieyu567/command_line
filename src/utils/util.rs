@@ -1,4 +1,7 @@
 use crate::types::env::Env;
+use csv;
+use serde::de::DeserializeOwned;
+use std::fs::File;
 
 pub(crate) fn get_db_url(env: &Env, module: &str) -> String {
     match env {
@@ -16,4 +19,15 @@ pub(crate) fn run_command(commands: Vec<String>) {
         println!("Exit Code: {}", code);
         println!("Error: {}", error);
     });
+}
+
+pub(crate) fn parse_csv<T>(path: String) -> csv::Result<Vec<T>>
+where
+    T: DeserializeOwned,
+{
+    let file = File::open(path)?;
+    let rdr = csv::ReaderBuilder::new()
+        .has_headers(false)
+        .from_reader(file);
+    rdr.into_deserialize().collect()
 }

@@ -5,6 +5,7 @@ alias operation_reason_task := run_operation_reason_add_task
 
 crsPodIp := `kubectl get pod -n stey -l app=stey-crs -o jsonpath='{.items[0].status.podIP}'`
 dcPodIp := `kubectl get pod -n stey -l app=stey-dc -o jsonpath='{.items[0].status.podIP}'`
+profilePodIp := `kubectl get pod -n stey -l app=stey-profile -o jsonpath='{.items[0].status.podIP}'`
 
 build_and_copy_to_desktop:
     cargo build --release
@@ -24,3 +25,6 @@ run_operation_reason_remove_task ENV:
 
 run_rate_plan_update_task ENV:
     ~/Desktop/scripts/command_line rate-plan-update --host {{crsPodIp}} -d {{ENV}}
+
+run_user_identity_add_task ENV:
+    ~/Desktop/scripts/command_line user-identity-add --host {{crsPodIp}} -d {{ENV}}

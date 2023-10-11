@@ -1,8 +1,6 @@
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::Read;
 
-use csv;
+use serde::Deserialize;
 use sqlx::mysql::{MySqlPoolOptions, MySqlRow};
 use sqlx::types::Uuid;
 use sqlx::Row;
@@ -25,7 +23,7 @@ struct RatePlanRecord {
     is_suppressed: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 struct CsvRecord {
     project_code: String,
     rate_plan_code: String,
@@ -47,25 +45,8 @@ pub(crate) async fn rate_plan_update(
         .connect(get_db_url(db_env, "crs").as_str())
         .await?;
 
-    let mut file =
-        File::open("/Users/peterxie/Desktop/scripts/rate_plan_market.csv")?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-
-    let mut reader = csv::Reader::from_reader(contents.as_bytes());
-    let mut records = Vec::new();
-    for result in reader.records() {
-        let record = result?;
-        let project_code = record.get(0).unwrap().to_string();
-        let rate_plan_code = record.get(1).unwrap().to_string();
-        let market_code = record.get(2).unwrap().to_string();
-        let record = CsvRecord {
-            project_code,
-            rate_plan_code,
-            market_code,
-        };
-        records.push(record);
-    }
+    let records =
+        parse_csv::<CsvRecord>(String::from("./rate_plan_market.csv"))?;
 
     let project_map: Vec<(String, Uuid)> = sqlx::query(
         "SELECT project_uuid, code FROM projection_project_project",
@@ -153,7 +134,7 @@ pub(crate) async fn rate_plan_update(
         })
         .collect();
 
-    let commands = rate_plan_info.into_iter().map(|rate_plan_info| format!(
+    let commands: Vec<String> = rate_plan_info.into_iter().map(|rate_plan_info| format!(
         "grpcurl -max-time 600 -d \'{{\"projectId\":\"{}\",\"ratePlanId\":\"{}\",\"code\":{},\"name\":{},\"sourceId\":\"{}\",\"marketId\":\"{}\",\"resvTypeId\":\"{}\",\"leadTime\":{},\"minStay\":{},\"maxStay\":{},\"breakfast\":{},\"isSuppressed\":{}}}\' --plaintext {}:9000 com.stey.crs.api.grpc.config.SteyCrsConfigService.ConfigRatePlanUpdate",
         rate_plan_info.project_uuid,
         rate_plan_info.rate_plan_uuid,
@@ -168,7 +149,7 @@ pub(crate) async fn rate_plan_update(
         rate_plan_info.breakfast,
         rate_plan_info.is_suppressed,
         host
-    )).collect::<Vec<String>>();
+    )).collect();
 
     run_command(commands);
 

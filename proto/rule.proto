@@ -1,0 +1,153 @@
+syntax = "proto3";
+
+package com.stey.rms.api.grpc.config;
+
+import "google/protobuf/empty.proto";
+
+option java_multiple_files = true;
+option java_package = "com.stey.rms.api.grpc.config";
+
+message RuleEngineAction {
+  oneof sealed_value {
+    Ignore ignore = 1;
+    WriteLog writeLog = 2;
+    SendEmail sendEmail = 3;
+  }
+}
+
+message Ignore {}
+
+message WriteLog {
+  string title = 1;
+}
+
+message SendEmail {
+  repeated string to = 1;
+  string title = 2;
+}
+
+message ConfigRuleEngineActionCreateRequest {
+  string projectId = 1;
+  RuleEngineAction ruleEngineAction = 2;
+}
+
+message ConfigRuleEngineActionCreateResponse {
+  string ruleEngineActionId = 1;
+}
+
+message RuleEngineFactValue {
+  oneof sealed_value {
+    Int int = 1;
+    Double double = 2;
+    String string = 3;
+    BigDecimal bigDecimal = 4;
+    Boolean boolean = 5;
+  }
+}
+
+message Int{
+  int32 value = 1;
+}
+
+message Double {
+  double value = 1;
+}
+
+message String {
+  string value = 1;
+}
+
+message BigDecimal {
+  string value = 1;
+}
+
+message Boolean {
+  bool value = 1;
+}
+
+enum RuleEnginePredicate {
+  RULE_ENGINE_PREDICATE_EQUAL = 0;
+  RULE_ENGINE_PREDICATE_UNEQUAL = 1;
+  RULE_ENGINE_PREDICATE_GREATER_OR_EQUAL = 2;
+  RULE_ENGINE_PREDICATE_LESS_OR_EQUAL = 3;
+  RULE_ENGINE_PREDICATE_GREATER = 4;
+  RULE_ENGINE_PREDICATE_LESS = 5;
+}
+
+enum RuleEngineSubject {
+  RULE_ENGINE_SUBJECT_DAILY_OCCUPANCY = 0;
+  RULE_ENGINE_SUBJECT_DAILY_PICK_UP = 1;
+  RULE_ENGINE_SUBJECT_DAILY_RATE_PLAN_PICK_UP = 2;
+  RULE_ENGINE_SUBJECT_DAILY_RATE_PLAN_DATE_PICK_UP = 3;
+}
+
+message ConfigRuleEngineConditionCreateRequest {
+  string projectId = 1;
+  RuleEngineSubject ruleEngineSubject = 2;
+  RuleEnginePredicate ruleEnginePredicate = 3;
+  RuleEngineFactValue ruleEngineFactValue = 4;
+}
+
+message ConfigRuleEngineConditionCreateResponse {
+  string ruleEngineConditionId = 1;
+}
+
+enum RuleEngineTriggerFunction {
+  RULE_ENGINE_TRIGGER_FUNCTION_FOR_ALL = 0;
+  RULE_ENGINE_TRIGGER_FUNCTION_EXISTS = 1;
+}
+
+message Code {
+  string underlying = 1;
+}
+
+message ConfigRuleEngineRuleCreateRequest {
+  string projectId = 1;
+  Code code = 2;
+  string description = 3;
+  RuleEngineTriggerFunction ruleEngineTriggerFunction = 4;
+  int32 threshold = 5;
+}
+
+message ConfigRuleEngineRuleCreateResponse {
+  string ruleEngineRuleId = 1;
+}
+
+message ConfigRuleEngineRuleGroupCreateRequest {
+  string projectId = 1;
+  Code code = 2;
+  string description = 3;
+}
+
+message ConfigRuleEngineRuleGroupCreateResponse {
+  string ruleEngineRuleGroupId = 1;
+}
+
+message ConfigRuleEngineRuleActionAssociateRequest {
+  string projectId = 1; // UUID
+  string ruleEngineRuleId = 2; // UUID
+  string ruleEngineActionId = 3; // UUID
+}
+
+message ConfigRuleEngineRuleConditionAssociateRequest {
+  string projectId = 1; // UUID
+  string ruleEngineRuleId = 2; // UUID
+  string ruleEngineConditionId = 3; // UUID
+}
+
+message ConfigRuleEngineRuleGroupRuleAssociateRequest {
+  string projectId = 1; // UUID
+  string ruleEngineRuleId = 2; // UUID
+  string ruleEngineRuleGroupId = 3; // UUID
+}
+
+service SteyRmsConfigService {
+  rpc ConfigRuleEngineActionCreate(ConfigRuleEngineActionCreateRequest) returns (ConfigRuleEngineActionCreateResponse) {};
+  rpc ConfigRuleEngineConditionCreate(ConfigRuleEngineConditionCreateRequest) returns (ConfigRuleEngineConditionCreateResponse) {};
+  rpc ConfigRuleEngineRuleCreate(ConfigRuleEngineRuleCreateRequest) returns (ConfigRuleEngineRuleCreateResponse) {};
+  rpc ConfigRuleEngineRuleGroupCreate(ConfigRuleEngineRuleGroupCreateRequest) returns (ConfigRuleEngineRuleGroupCreateResponse) {};
+
+  rpc ConfigRuleEngineRuleActionAssociate(ConfigRuleEngineRuleActionAssociateRequest) returns (google.protobuf.Empty) {};
+  rpc ConfigRuleEngineRuleConditionAssociate(ConfigRuleEngineRuleConditionAssociateRequest) returns (google.protobuf.Empty) {};
+  rpc ConfigRuleEngineRuleGroupRuleAssociate(ConfigRuleEngineRuleGroupRuleAssociateRequest) returns (google.protobuf.Empty) {};
+}

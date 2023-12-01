@@ -7,6 +7,7 @@ use crate::tasks::rate_plan_online_payment_channel_unset::{
 use crate::types::env::Env;
 
 mod error;
+mod protos;
 mod tasks;
 mod types;
 mod utils;
@@ -31,6 +32,7 @@ enum Commands {
     OperationReasonDeleteAll(CommonArgs),
     RatePlanUpdate(CommonArgs),
     UserIdentityAdd(CommonArgs),
+    RuleAdd(CommonArgs),
 }
 
 #[derive(Parser, Debug)]
@@ -101,6 +103,11 @@ struct RatePlanOnlinePaymentChannelUnsetArgs {
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Cli::parse();
+
+    let subscriber = tracing_subscriber::FmtSubscriber::new();
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("setting default subscriber failed");
+
     match &args.command {
         Commands::TrnCodeTagAdd(trn_code_tag_add_args) => {
             tasks::tag_add::trn_code_tag_add(
@@ -164,6 +171,10 @@ async fn main() -> Result<()> {
                 &common_args.db_env,
             )
             .await?
+        }
+        Commands::RuleAdd(common_args) => {
+            tasks::rule_add::rule_add(&common_args.host, &common_args.db_env)
+                .await?
         }
     }
 

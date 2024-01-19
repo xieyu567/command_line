@@ -33,6 +33,7 @@ enum Commands {
     RatePlanUpdate(CommonArgs),
     UserIdentityAdd(CommonArgs),
     RuleAdd(CommonArgs),
+    AuthPermissionAdd(CommonArgs),
 }
 
 #[derive(Parser, Debug)]
@@ -175,6 +176,13 @@ async fn main() -> Result<()> {
         Commands::RuleAdd(common_args) => {
             tasks::rule_add::rule_add(&common_args.host, &common_args.db_env)
                 .await?
+        }
+        Commands::AuthPermissionAdd(common_args) => {
+            tasks::auth_permission_add::auth_permission_add(
+                &common_args.host,
+                &common_args.db_env,
+            )
+            .await?
         }
     }
 

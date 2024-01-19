@@ -7,6 +7,7 @@ crsPodIp := `kubectl get pod -n stey -l app=stey-crs -o jsonpath='{.items[0].sta
 dcPodIp := `kubectl get pod -n stey -l app=stey-dc -o jsonpath='{.items[0].status.podIP}'`
 profilePodIp := `kubectl get pod -n stey -l app=stey-profile -o jsonpath='{.items[0].status.podIP}'`
 rmsPodIp := `kubectl get pod -n stey -l app=stey-rms -o jsonpath='{.items[0].status.podIP}'`
+authPodIp := `kubectl get pod -n stey -l app=stey-auth -o jsonpath='{.items[0].status.podIP}'`
 
 build_and_copy_to_desktop:
     cargo build --release
@@ -32,3 +33,6 @@ run_user_identity_add_task ENV:
 
 run_rule_add_task ENV:
     ~/Desktop/scripts/command_line rule-add --host {{rmsPodIp}} -d {{ENV}}
+
+run_auth_permission_add_task ENV:
+    ~/Desktop/scripts/command_line auth-permission-add --host {{authPodIp}} -d {{ENV}}

@@ -13,7 +13,6 @@ use crate::utils::util::*;
 #[derive(Debug, sqlx::FromRow)]
 struct SpaceInfo {
     project_uuid: Uuid,
-    // #[sqlx(rename = "code")]
     project_code: String,
     space_uuid: Uuid,
     space_code: String,

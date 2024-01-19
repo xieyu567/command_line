@@ -1,3 +1,4 @@
+pub mod auth_permission_add;
 pub mod operation_reason_add;
 pub mod operation_reason_delete_all;
 pub mod rate_plan_online_payment_channel_unset;

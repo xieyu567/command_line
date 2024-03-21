@@ -36,3 +36,6 @@ run_rule_add_task ENV:
 
 run_auth_permission_add_task ENV:
     ~/Desktop/scripts/command_line auth-permission-add --host {{authPodIp}} -d {{ENV}}
+
+run_base_rate_limit_add_task ENV:
+    ~/Desktop/scripts/command_line base-rate-limit-add --host {{crsPodIp}} -d {{ENV}}

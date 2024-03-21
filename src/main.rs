@@ -34,6 +34,7 @@ enum Commands {
     UserIdentityAdd(CommonArgs),
     RuleAdd(CommonArgs),
     AuthPermissionAdd(CommonArgs),
+    BaseRateLimitAdd(CommonArgs),
 }
 
 #[derive(Parser, Debug)]
@@ -116,7 +117,7 @@ async fn main() -> Result<()> {
                 &trn_code_tag_add_args.tag_type,
                 &trn_code_tag_add_args.db_env,
             )
-            .await?;
+                .await?;
         }
         Commands::TrnCodeTagRemove(trn_code_tag_remove_args) => {
             tasks::tag_remove::trn_code_tag_remove(
@@ -124,7 +125,7 @@ async fn main() -> Result<()> {
                 &trn_code_tag_remove_args.tag_type,
                 &trn_code_tag_remove_args.db_env,
             )
-            .await?;
+                .await?;
         }
         Commands::RoomAttributeAdd(room_attribute_add_args) => {
             tasks::room_attribute_add::room_attribute_add(
@@ -132,7 +133,7 @@ async fn main() -> Result<()> {
                 &room_attribute_add_args.csv_path,
                 &room_attribute_add_args.db_env,
             )
-            .await?;
+                .await?;
         }
         Commands::RatePlanOnlinePaymentChannelUnset(
             rate_plan_online_payment_channel_unset_args,
@@ -150,28 +151,28 @@ async fn main() -> Result<()> {
                 &common_args.host,
                 &common_args.db_env,
             )
-            .await?;
+                .await?;
         }
         Commands::OperationReasonDeleteAll(common_args) => {
             tasks::operation_reason_delete_all::operation_reason_delete_all(
                 &common_args.host,
                 &common_args.db_env,
             )
-            .await?;
+                .await?;
         }
         Commands::RatePlanUpdate(common_args) => {
             tasks::rate_plan_update::rate_plan_update(
                 &common_args.host,
                 &common_args.db_env,
             )
-            .await?;
+                .await?;
         }
         Commands::UserIdentityAdd(common_args) => {
             tasks::user_identity_add::user_identity_add(
                 &common_args.host,
                 &common_args.db_env,
             )
-            .await?
+                .await?
         }
         Commands::RuleAdd(common_args) => {
             tasks::rule_add::rule_add(&common_args.host, &common_args.db_env)
@@ -182,7 +183,13 @@ async fn main() -> Result<()> {
                 &common_args.host,
                 &common_args.db_env,
             )
-            .await?
+                .await?
+        }
+        Commands::BaseRateLimitAdd(common_args) => {
+            tasks::base_rate_limit_add::base_rate_limit_add(
+                &common_args.host,
+                &common_args.db_env,
+            ).await?
         }
     }
 

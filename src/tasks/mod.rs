@@ -8,3 +8,4 @@ pub mod rule_add;
 pub mod tag_add;
 pub mod tag_remove;
 pub mod user_identity_add;
+pub mod base_rate_limit_add;
